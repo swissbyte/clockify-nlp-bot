@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Azure;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
+using Microsoft.Bot.Connector.Authentication;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +35,7 @@ namespace Bot
         private readonly string _dataConnectionString;
         private readonly string _containerName;
         private readonly IConfiguration _configuration;
+
         public Startup(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -44,6 +46,7 @@ namespace Bot
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers().AddNewtonsoftJson();
+            services.AddHttpClient().AddControllers().AddNewtonsoftJson();
 
             // Configure app insight if the key exists. New Azure regions require the use of connection strings
             // instead of instrumentation keys.
@@ -52,10 +55,13 @@ namespace Bot
             {
                 services.AddApplicationInsightsTelemetry(appInsightConnectionString);
             }
-            
+
             ConfigureLocalization(services);
 
             var clockifyService = new ClockifyService(new ClockifyClientFactory());
+
+            // Create the Bot Framework Authentication to be used with the Bot Adapter.
+            services.AddSingleton<BotFrameworkAuthentication, ConfigurationBotFrameworkAuthentication>();
 
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
             services.AddSingleton<TextToDateRangeService>();
@@ -72,9 +78,9 @@ namespace Bot
             services.AddSingleton<ClockifyEntityRecognizer, ClockifyEntityRecognizer>();
             services.AddSingleton<UserProfilesProvider>();
             services.AddSingleton<IClockifyService>(clockifyService);
-            
+
             services.AddSingleton<NotifyUsersDialog, NotifyUsersDialog>();
-            
+
             // DIC
             services.AddSingleton<DicSetupDialog, DicSetupDialog>();
             services.AddSingleton<IDipendentiInCloudClient, DipendentiInCloudClient>();
@@ -104,16 +110,26 @@ namespace Bot
             {
                 storage = new AzureBlobStorage(_dataConnectionString, _containerName);
             }
-            
+
             if (!int.TryParse(_configuration["TokenCacheSeconds"], out var cacheSeconds))
             {
                 cacheSeconds = 30;
             }
+
             ConfigureAzureKeyVault(services, _configuration["KeyVaultName"], cacheSeconds);
 
+            // var userState = new UserState(storage);
+            // var conversationState = new ConversationState(storage);
+
             services.AddSingleton(storage);
-            services.AddSingleton<ConversationState>();
+            // services.AddSingleton(conversationState);
+            // services.AddSingleton(userState);
+            //
+            // services.AddSingleton(userState.CreateProperty<UserProfile>("UserProfile"));
+
             services.AddSingleton<UserState>();
+            services.AddSingleton<ConversationState>();
+            
             services.AddSingleton<IBot, Supports.Bot>();
             services.AddSingleton<IAzureBlobReader, AzureBlobReader>();
             services.AddSingleton<IUserProfileStorageReader, UserProfileStorageReader>();
@@ -148,7 +164,7 @@ namespace Bot
                 services.AddSingleton<ITokenRepository, InMemoryTokenRepository>();
                 return;
             }
-            
+
             var options = new SecretClientOptions()
             {
                 Retry =
@@ -179,9 +195,9 @@ namespace Bot
             }
             else
             {
-                services.AddSingleton<IRecognizer>(sp => new CommonRecognizer(luisAppId!, luisApiKey!, luisApiHostName!));
+                services.AddSingleton<IRecognizer>(
+                    sp => new CommonRecognizer(luisAppId!, luisApiKey!, luisApiHostName!));
             }
-
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
