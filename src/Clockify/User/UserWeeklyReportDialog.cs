@@ -16,8 +16,6 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
-
-
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Schema;
@@ -77,6 +75,18 @@ namespace Bot.Clockify.User
         {
             public string type { get; set; }
             public ChartData data { get; set; }
+            public ChartOptions? options { get; set; }
+        }
+
+        public class ChartTitle
+        {
+            public bool display { get; set; }
+            public string text { get; set; }
+        }
+
+        public class ChartOptions
+        {
+            public ChartTitle title { get; set; }
         }
 
         private async Task<DialogTurnResult> PromptForTaskAsync(WaterfallStepContext stepContext,
@@ -103,7 +113,7 @@ namespace Bot.Clockify.User
 
             var workspaces = await _clockifyService.GetWorkspacesAsync(clockifyToken);
             var chartUri = "";
-            
+
             foreach (var workspace in workspaces)
             {
                 var summary =
@@ -126,13 +136,21 @@ namespace Bot.Clockify.User
                             }
                         }
                     },
-                    type = "doughnut"
+                    type = "doughnut",
+                    options = new ChartOptions
+                    {
+                        title = new ChartTitle
+                        {
+                            display = true,
+                            text = $"Report for {monday} to {friday}\n" + $"Generated: {userNow}"
+                        }
+                    }
                 };
 
 
                 chartUri = JsonConvert.SerializeObject(chart);
             }
-            
+
 
             chartUri = "https://quickchart.io/chart?c=" + chartUri;
             //Inform user and exit the conversation.
@@ -145,10 +163,11 @@ namespace Bot.Clockify.User
         {
             string platform = stepContext.Context.Activity.ChannelId;
 
-            
-            await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(new Attachment("image/png", chartUri)), cancellationToken);
 
-            
+            await stepContext.Context.SendActivityAsync(
+                MessageFactory.Attachment(new Attachment("image/png", chartUri)), cancellationToken);
+
+
             return await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
         }
 
