@@ -132,7 +132,7 @@ namespace Bot.Clockify.User
                         {
                             new ChartDataset
                             {
-                                data = summary.Result.groupOne.Select(x => x.duration / 60).ToList()
+                                data = summary.Result.groupOne.Select(x => x.duration / 60 / 60).ToList()
                             }
                         }
                     },
