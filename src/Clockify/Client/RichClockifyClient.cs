@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Bot.Clockify.Models;
 using Clockify.Net;
 using Clockify.Net.Models.Clients;
 using Clockify.Net.Models.Projects;
+using Clockify.Net.Models.Reports;
 using Clockify.Net.Models.Tags;
 using Clockify.Net.Models.Tasks;
 using Clockify.Net.Models.TimeEntries;
@@ -17,10 +19,12 @@ namespace Bot.Clockify.Client
     public class RichClockifyClient : IClockifyClient
     {
         private readonly ClockifyClient _clockifyClient;
+        private readonly IRestClient _restClient;
 
         public RichClockifyClient(string apiKey)
         {
             _clockifyClient = new ClockifyClient(apiKey);
+            _restClient = new RestClient();
         }
 
         public Task<IRestResponse> DeleteTimeEntryAsync(string workspaceId, string timeEntryId)
@@ -43,6 +47,31 @@ namespace Bot.Clockify.Client
             return _clockifyClient.FindAllHydratedTimeEntriesForUserAsync(workspaceId, userId, description, start, end,
                 project, task, projectRequired, taskRequired, considerDurationFormat, inProgress, page, pageSize);
         }
+
+
+        public Task<IRestResponse<List<SummaryReportDto>>> GetSummaryReportForWorkspace(DateTimeOffset start,
+            DateTimeOffset end, string workspaceId)
+        {
+
+            var summaryReportRequest = new SummaryReportRequest
+            {
+                DateRangeStart = start,
+                DateRangeEnd = end,
+                SummaryFilter = new SummaryFilterDto
+                {
+                    Groups = new List<GroupType> { GroupType.PROJECT }
+                }
+            };
+
+            var request = new RestRequest("workspaces/" + workspaceId + "/reports/summary", Method.POST);
+            request.AddJsonBody((object) summaryReportRequest);
+
+            _clockifyClient.GetSummaryReportAsync(workspaceId, summaryReportRequest);
+            
+            var res =  _restClient.ExecuteGetAsync<List<SummaryReportDto>>((IRestRequest) request);
+            return res; 
+        }
+
 
         public Task<IRestResponse<List<TaskDto>>> FindAllTasksAsync(string workspaceId, string projectId,
             bool? isActive = null, string? name = null, int page = 1,

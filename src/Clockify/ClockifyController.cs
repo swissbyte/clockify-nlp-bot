@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Bot.Clockify.Client;
 using Bot.Remind;
 using Bot.Security;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,8 @@ namespace Bot.Clockify
         public ClockifyController(IBotFrameworkHttpAdapter adapter,
             IProactiveBotApiKeyValidator proactiveBotApiKeyValidator,
             ISpecificRemindServiceResolver specificRemindServiceResolver,
-            IFollowUpService followUpService)
+            IFollowUpService followUpService,
+            IClockifyClient clockifyClient)
         {
             _adapter = adapter;
             _proactiveBotApiKeyValidator = proactiveBotApiKeyValidator;
@@ -75,5 +77,17 @@ namespace Bot.Clockify
 
             return $"Sent follow up to {followedUsers.Count} users";
         }
+
+        // [Route("api/summary")]
+        // [HttpGet]
+        // public async Task<string> SendSummaryAsync()
+        // {
+        //     string apiToken = ProactiveApiKeyUtil.Extract(Request);
+        //     _proactiveBotApiKeyValidator.Validate(apiToken);
+        //     
+        //
+        //     
+        // }
+        //
     }
 }

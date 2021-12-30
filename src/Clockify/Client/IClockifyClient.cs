@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Clockify.Net.Models.Clients;
 using Clockify.Net.Models.Projects;
+using Clockify.Net.Models.Reports;
 using Clockify.Net.Models.Tags;
 using Clockify.Net.Models.Tasks;
 using Clockify.Net.Models.TimeEntries;
@@ -25,6 +26,9 @@ namespace Bot.Clockify.Client
         Task<IRestResponse<TaskDto>> CreateTaskAsync(string workspaceId, string projectId, TaskRequest taskRequest);
 
         Task<IRestResponse<CurrentUserDto>> GetCurrentUserAsync();
+
+        public Task<IRestResponse<List<SummaryReportDto>>> GetSummaryReportForWorkspace(DateTimeOffset start,
+            DateTimeOffset end, string workspaceId);
 
         Task<IRestResponse<List<WorkspaceDto>>> GetWorkspacesAsync();
 

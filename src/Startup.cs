@@ -71,6 +71,7 @@ namespace Bot
             services.AddSingleton<EntryFillDialog>();
             services.AddSingleton<UserSettingsDialog>();
             services.AddSingleton<LogoutDialog>();
+            services.AddSingleton<UserWeeklyReportDialog>();
             services.AddSingleton<StopReminderDialog>();
             services.AddSingleton<WorthAskingForTaskService>();
             services.AddSingleton<ITimeEntryStoreService, TimeEntryStoreService>();

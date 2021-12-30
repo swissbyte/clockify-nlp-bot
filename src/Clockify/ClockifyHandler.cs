@@ -22,14 +22,16 @@ namespace Bot.Clockify
         private readonly StopReminderDialog _stopReminderDialog;
         private readonly ClockifySetupDialog _clockifySetupDialog;
         private readonly LogoutDialog _logoutDialog;
+        private readonly UserWeeklyReportDialog _userWeeklyReportDialog;
         private readonly DialogSet _dialogSet;
         private readonly IStatePropertyAccessor<DialogState> _dialogState;
 
         private readonly IEnumerable<string> _logoutIntent = new HashSet<string> { "log out", "logout" };
+        private readonly IEnumerable<string> _summaryIntent = new HashSet<string> { "weekly summary", "weekly stats" };
         
         public ClockifyHandler(EntryFillDialog fillDialog, ReportDialog reportDialog,
             StopReminderDialog stopReminderDialog, UserSettingsDialog userSettingsDialog, ConversationState conversationState,
-            ClockifySetupDialog clockifySetupDialog, LogoutDialog logoutDialog)
+            ClockifySetupDialog clockifySetupDialog, LogoutDialog logoutDialog, UserWeeklyReportDialog userWeeklyReportDialog)
         {
             _dialogState = conversationState.CreateProperty<DialogState>("ClockifyDialogState");
             _fillDialog = fillDialog;
@@ -38,13 +40,15 @@ namespace Bot.Clockify
             _stopReminderDialog = stopReminderDialog;
             _clockifySetupDialog = clockifySetupDialog;
             _logoutDialog = logoutDialog;
+            _userWeeklyReportDialog = userWeeklyReportDialog;
             _dialogSet = new DialogSet(_dialogState)
                 .Add(_fillDialog)
                 .Add(_stopReminderDialog)
                 .Add(_userSettingsDialog)
                 .Add(_reportDialog)
                 .Add(_clockifySetupDialog)
-                .Add(_logoutDialog);
+                .Add(_logoutDialog)
+                .Add(_userWeeklyReportDialog);
         }
 
         public async Task<bool> Handle(ITurnContext turnContext, CancellationToken cancellationToken,
@@ -65,6 +69,14 @@ namespace Bot.Clockify
                 await dialogContext.BeginDialogAsync(_logoutDialog.Id, cancellationToken: cancellationToken);
                 return true;
             }
+            
+            //Check for fixed intents without using LUIS
+            if (_summaryIntent.Contains(turnContext.Activity.Text))
+            {
+                await dialogContext.BeginDialogAsync(_userWeeklyReportDialog.Id, cancellationToken: cancellationToken);
+                return true;
+            }
+            
 
             try
             {

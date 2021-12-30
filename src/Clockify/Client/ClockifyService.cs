@@ -30,6 +30,18 @@ namespace Bot.Clockify.Client
             return ClockifyModelFactory.ToUserDo(response.Data);
         }
 
+        public async Task<bool> GetSummaryReportForWorkspace(string apiKey, DateTimeOffset start,
+            DateTimeOffset end, string workspaceId)
+        {
+            var clockifyClient = _clockifyClientFactory.CreateClient(apiKey);
+            var response = await clockifyClient.GetSummaryReportForWorkspace(start, end, workspaceId);
+            ThrowUnauthorizedIf401(response);
+            if (!response.IsSuccessful) throw new ErrorResponseException("Unable to get workspaces");
+
+            var test = response.Data.ToList();
+            return true;
+        }
+
         public async Task<List<WorkspaceDo>> GetWorkspacesAsync(string apiKey)
         {
             var clockifyClient = _clockifyClientFactory.CreateClient(apiKey);

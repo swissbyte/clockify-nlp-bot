@@ -13,6 +13,9 @@ namespace Bot.Clockify.Client
 
         public Task<List<ClientDo>> GetClientsAsync(string apiKey, string workspaceId);
 
+        public Task<bool> GetSummaryReportForWorkspace(string apiKey, DateTimeOffset start,
+            DateTimeOffset end, string workspaceId);
+
         public Task<List<ProjectDo>> GetProjectsAsync(string apiKey, string workspaceId);
 
         public Task<List<ProjectDo>> GetProjectsByClientsAsync(string apiKey,
