@@ -12,7 +12,11 @@ using Clockify.Net.Models.Tasks;
 using Clockify.Net.Models.TimeEntries;
 using Clockify.Net.Models.Users;
 using Clockify.Net.Models.Workspaces;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using RestSharp;
+using RestSharp.Serializers.NewtonsoftJson;
 
 namespace Bot.Clockify.Client
 {
@@ -24,7 +28,23 @@ namespace Bot.Clockify.Client
         public RichClockifyClient(string apiKey)
         {
             _clockifyClient = new ClockifyClient(apiKey);
-            _restClient = new RestClient();
+            
+            JsonSerializerSettings settings = new JsonSerializerSettings()
+            {
+                Converters = (IList<JsonConverter>) new List<JsonConverter>()
+                {
+                    (JsonConverter) new StringEnumConverter(),
+                    (JsonConverter) new IsoDateTimeConverter()
+                    {
+                        DateTimeFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"
+                    }
+                },
+                ContractResolver = (IContractResolver) new CamelCasePropertyNamesContractResolver()
+            };
+            
+            
+            _restClient = (IRestClient) new RestClient("https://reports.api.clockify.me/v1");
+            _restClient.UseNewtonsoftJson(settings);
         }
 
         public Task<IRestResponse> DeleteTimeEntryAsync(string workspaceId, string timeEntryId)
@@ -49,8 +69,8 @@ namespace Bot.Clockify.Client
         }
 
 
-        public Task<IRestResponse<List<SummaryReportDto>>> GetSummaryReportForWorkspace(DateTimeOffset start,
-            DateTimeOffset end, string workspaceId)
+        public async Task<IRestResponse<WorkspaceReportDo>> GetSummaryReportForWorkspace(DateTimeOffset start,
+            DateTimeOffset end, string workspaceId, string clockifyApiKey)
         {
 
             var summaryReportRequest = new SummaryReportRequest
@@ -65,10 +85,10 @@ namespace Bot.Clockify.Client
 
             var request = new RestRequest("workspaces/" + workspaceId + "/reports/summary", Method.POST);
             request.AddJsonBody((object) summaryReportRequest);
-
-            _clockifyClient.GetSummaryReportAsync(workspaceId, summaryReportRequest);
             
-            var res =  _restClient.ExecuteGetAsync<List<SummaryReportDto>>((IRestRequest) request);
+            _restClient.AddDefaultHeader("X-Api-Key", clockifyApiKey);
+
+            var res =  await _restClient.ExecutePostAsync<WorkspaceReportDo>((IRestRequest) request);
             return res; 
         }
 

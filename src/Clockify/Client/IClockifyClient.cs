@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Bot.Clockify.Models;
 using Clockify.Net.Models.Clients;
 using Clockify.Net.Models.Projects;
 using Clockify.Net.Models.Reports;
@@ -27,8 +28,8 @@ namespace Bot.Clockify.Client
 
         Task<IRestResponse<CurrentUserDto>> GetCurrentUserAsync();
 
-        public Task<IRestResponse<List<SummaryReportDto>>> GetSummaryReportForWorkspace(DateTimeOffset start,
-            DateTimeOffset end, string workspaceId);
+        public Task<IRestResponse<WorkspaceReportDo>> GetSummaryReportForWorkspace(DateTimeOffset start,
+            DateTimeOffset end, string workspaceId, string clockifyApiKey);
 
         Task<IRestResponse<List<WorkspaceDto>>> GetWorkspacesAsync();
 
