@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AdaptiveExpressions;
 using Bot.Clockify.Client;
 using Bot.Clockify.Models;
 using F23.StringSimilarity.Interfaces;
@@ -46,9 +47,21 @@ namespace Bot.Clockify.Fill
             var best = scoredProjectsList.First();
             var secondBest = scoredProjectsList.Take(2).Last();
             bool moreThanOneTopScore = !best.Project.Equals(secondBest.Project) && Math.Abs(best.Distance - secondBest.Distance) < .01;
-            bool scoreTooLow = best.Distance > 0.3;
+            bool textScoreTooLow = best.Distance > 0.3;
 
-            if (scoreTooLow)
+            //Check if we got a number and if we were not able to find a text based match
+            if (textScoreTooLow && workedEntity.Any(char.IsDigit))
+            {
+                //Check if we find an exact match with a number
+                var exactNumberMatches = possibleProjects.Where(t => t.Name.ToLower().Contains(workedEntity.ToLower())).ToList();
+                if (exactNumberMatches.Count == 1)
+                {
+                    return exactNumberMatches.First();
+                }
+            }
+            
+            
+            if (textScoreTooLow)
             {
                 throw new CannotRecognizeProjectException(workedEntity);
             }
