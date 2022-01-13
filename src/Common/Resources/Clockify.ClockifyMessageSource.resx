@@ -40,7 +40,7 @@
         <value>Ok, as you wish</value>
     </data>
     <data name="AddEntryFeedback" xml:space="preserve">
-        <value>Ok, I added {0:0} minutes entry on {1}. In total you have now {2:0.00} hours filled</value>
+        <value>Ok, I added **{0:0} minutes** entry on **{1}**. In total you have now **{2:0.00} hours filled** which is **{3:0.00}% of your {4:0.00}h target**</value>
     </data>
     <data name="EntryFillUnderstandingError" xml:space="preserve">
         <value>Sorry, I can see you want to fill some entries, but I have troubles understanding how many and on which project... Can you try and be more specific?</value>
@@ -55,7 +55,7 @@
         <value>I can't get a matching task... can you be more specific?</value>
     </data>
     <data name="TaskSelectionQuestion" xml:space="preserve">
-        <value>Any task in particular?</value>
+        <value>The Project **{0}** has multiple tasks. Should i add your hours to any task in particular?</value>
     </data>
     <data name="No" xml:space="preserve">
         <value>no</value>
@@ -70,7 +70,7 @@
         <value>I can see you want to report some hours, but I really can't understand how many 😕</value>
     </data>
     <data name="ReportTotalHours" xml:space="preserve">
-        <value>Between {0}, you worked **{1:0.00}** days ({2} hours)</value>
+        <value>Between {0}, you worked **{2:0.00} hours** ({1:0.00} w-days)</value>
     </data>
     <data name="ReportNoWork" xml:space="preserve">
         <value>No work to report on workspace **{0}**</value>

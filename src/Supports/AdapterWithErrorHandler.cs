@@ -31,6 +31,7 @@ namespace Bot.Supports
                 else
                 {
                     await turnContext.SendActivityAsync(MessageFactory.Text(messageSource.GenericError));
+                    await turnContext.SendActivityAsync(MessageFactory.Text($"Details: {exception.Message}"));
                 }
                 
                 if (conversationState != null)

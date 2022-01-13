@@ -66,9 +66,10 @@ namespace Bot.Clockify.Reports
 
             if (totalHours > 0)
             {
+                //ToDo: remove magic number 8.0
                 var days = totalHours / 8.0;
                 string intro = string.Format(_messageSource.ReportTotalHours, dateRange.ToString(),
-                                              days, (int)totalHours);
+                                              days, totalHours);
                 return intro + "\n\n" + fullSummary;
             }
 

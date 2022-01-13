@@ -39,6 +39,10 @@ namespace Bot.Clockify.Fill
         private const string Abort = "abort";
 
         private const string Telegram = "telegram";
+        
+        //Get de default hours to work. If not defined, assume 8hours
+        public static readonly string DefaultWorkingHours =
+            Environment.GetEnvironmentVariable("DEFAULT_WORKING_HOURS") ?? "8";
 
         public EntryFillDialog(ClockifyEntityRecognizer clockifyWorkableRecognizer,
             ITimeEntryStoreService timeEntryStoreService, WorthAskingForTaskService worthAskingForTask,
@@ -111,7 +115,7 @@ namespace Bot.Clockify.Fill
                             Value = NewTask,
                             DisplayText = _messageSource.NewTask
                         });
-                    var activity = MessageFactory.Text(_messageSource.TaskSelectionQuestion);
+                    var activity = MessageFactory.Text(string.Format(_messageSource.TaskSelectionQuestion, recognizedProject.Name));
                     activity.SuggestedActions = new SuggestedActions {Actions = suggestions};
                     return await stepContext.PromptAsync(AskForTaskStep, new PromptOptions
                     {
@@ -254,10 +258,22 @@ namespace Bot.Clockify.Fill
             CancellationToken cancellationToken, string clockifyToken, ProjectDo recognizedProject, 
             DateTime start, DateTime end, string fullEntity, TaskDo? task)
         {
+            
+            var userProfile =
+                await StaticUserProfileHelper.GetUserProfileAsync(_userState, stepContext.Context, cancellationToken);
             double current =
                 await _timeEntryStoreService.AddTimeEntries(clockifyToken, recognizedProject, task, start, end);
+
+
+            var workingHours = double.Parse(DefaultWorkingHours);
+            if (userProfile.WorkingHours != null)
+            {
+                workingHours = double.Parse(DefaultWorkingHours);
+            }
+            double workingHoursPercentage = (current / workingHours * 100);
+
             string messageText = 
-                string.Format(_messageSource.AddEntryFeedback, (end-start).TotalMinutes, fullEntity, current);
+                string.Format(_messageSource.AddEntryFeedback, (end-start).TotalMinutes, fullEntity, current, workingHoursPercentage, workingHours);
             string platform = stepContext.Context.Activity.ChannelId;
             var ma = GetExitMessageActivity(messageText, platform);
             await stepContext.Context.SendActivityAsync(ma, cancellationToken);
