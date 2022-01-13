@@ -114,7 +114,9 @@ namespace Bot.Clockify.Client
                 throw new ErrorResponseException(
                     $"Unable to get time entries for workspaceId {workspaceId} for user {userId}");
 
-            return response.Data.Select(ClockifyModelFactory.ToHydratedTimeEntryDo).ToList();
+            //Filter out entries, where no project is assigned to. 
+            var realProjects = response.Data.Where(x => x.Project != null);
+            return realProjects.Select(ClockifyModelFactory.ToHydratedTimeEntryDo).ToList();
         }
 
         public async Task<string?> GetTagAsync(string apiKey, string workspaceId, string tagName)
