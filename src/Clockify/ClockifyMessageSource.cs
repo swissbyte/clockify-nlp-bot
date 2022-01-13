@@ -22,6 +22,7 @@ namespace Bot.Clockify
         public string TaskCreationError => GetString(nameof(TaskCreationError));
         public string TaskUnrecognized => GetString(nameof(TaskUnrecognized));
         public string TaskCreation => GetString(nameof(TaskCreation));
+        public string TaskPossibilities => GetString(nameof(TaskPossibilities));
         public string TaskAbort => GetString(nameof(TaskAbort));
         public string AddEntryFeedback => GetString(nameof(AddEntryFeedback));
         public string SetWorkingHoursFeedback => GetString(nameof(SetWorkingHoursFeedback));

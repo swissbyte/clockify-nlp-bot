@@ -8,6 +8,7 @@
 
         string TaskCreationError { get; }
         string TaskUnrecognized { get; }
+        string TaskPossibilities { get; }
         string TaskCreation { get; }
         string TaskAbort { get; }
         string AddEntryFeedback { get; }

@@ -31,7 +31,10 @@
         <value>Sorry, it appears you can't create tasks</value>
     </data>
     <data name="TaskUnrecognized" xml:space="preserve">
-        <value>I can't get a matching task...</value>
+        <value>I can't get a matching task... can you be more specific?</value>
+    </data>
+    <data name="TaskPossibilities" xml:space="preserve">
+        <value>**Possible tasks are:** {0}</value>
     </data>
     <data name="TaskCreation" xml:space="preserve">
         <value>What is the name of the task you want to create?</value>

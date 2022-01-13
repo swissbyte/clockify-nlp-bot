@@ -85,10 +85,11 @@ namespace Bot.Clockify.Fill
             return possibleProjects;
         }
 
-        private async Task<IEnumerable<TaskDo>> GetAllPossibleTasks(string apiKey, ProjectDo project)
+        public async Task<IEnumerable<TaskDo>> GetAllPossibleTasks(string apiKey, ProjectDo project)
         {
             return await _clockifyService.GetTasksAsync(apiKey, project.WorkspaceId, project.Id);
         }
+        
 
         public async Task<TaskDo> RecognizeTask(string? workedEntity, string apiKey, ProjectDo project)
         {

@@ -116,6 +116,14 @@ namespace Bot.Clockify.Fill
                             DisplayText = _messageSource.NewTask
                         });
                     var activity = MessageFactory.Text(string.Format(_messageSource.TaskSelectionQuestion, recognizedProject.Name));
+
+                    var projectTasks = await _clockifyWorkableRecognizer.GetAllPossibleTasks(clockifyToken, recognizedProject);
+
+                    var projectTasksList = "\n\n" + String.Join("\r\n", projectTasks.Select(x => x.Name));
+                    
+                    await stepContext.Context.SendActivityAsync(MessageFactory.Text(
+                        string.Format(_messageSource.TaskPossibilities, projectTasksList)), cancellationToken);
+
                     activity.SuggestedActions = new SuggestedActions {Actions = suggestions};
                     return await stepContext.PromptAsync(AskForTaskStep, new PromptOptions
                     {
